@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { Game, Member, PlayState, reducer, ScreenState } from "./data";
 import Home from "./pages/Home";
 import { times, random, shuffle } from "lodash";
@@ -14,7 +14,7 @@ function App() {
     screenState: ScreenState.HOME,
     currentGame: "",
   });
-  const [interval, setIntervalState] = useState<any>(null);
+  const interval = useRef<any>();
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       if (user) {
@@ -55,8 +55,8 @@ function App() {
           const game: Game = {
             code: randomCode,
             admin: state.self.uid,
-            timeAllotted: 10,
-            numQuestions: 5,
+            timeAllotted: 5,
+            numQuestions: 2,
             state: { type: "lobby" },
           };
           const member: Member = {
@@ -80,7 +80,7 @@ function App() {
 
   const onTick = useCallback(() => {
     const ref = db.collection("games").doc(state.currentGame);
-    gameTick(ref, interval);
+    gameTick(ref, interval.current);
   }, [interval, state]);
 
   const startGame = useCallback(() => {
@@ -93,16 +93,15 @@ function App() {
         currentTime: game.timeAllotted,
         questions: shuffle(questions.map((q, i) => i)).slice(
           0,
-          game.numQuestions - 1
+          game.numQuestions
         ),
         showingScoreboard: false,
         gameOver: false,
       };
       await ref.update({ state: gameState });
       await addQuestionToMemberStack(ref, gameState.questions[0]);
-      console.log("beginning loop");
       const int = setInterval(onTick, 1000);
-      setIntervalState(() => int);
+      interval.current = int;
     })();
   }, [state, onTick]);
   return (

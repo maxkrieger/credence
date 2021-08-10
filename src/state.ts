@@ -31,6 +31,7 @@ export const gameTick = async (gameRef: docRef, interval: NodeJS.Timeout) => {
   const state = game.state as PlayState;
   const gameOver =
     state.currentTime === 1 &&
+    state.showingScoreboard &&
     state.currentQuestionIdx === state.questions.length - 1;
   const showingScoreboard =
     state.currentTime === 1
@@ -46,7 +47,6 @@ export const gameTick = async (gameRef: docRef, interval: NodeJS.Timeout) => {
   }
   if (gameOver) {
     clearInterval(interval);
-    console.log("game over");
   }
   await gameRef.update({
     "state.currentTime":
