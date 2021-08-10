@@ -3,10 +3,10 @@ import { Game, Member, PlayState, reducer, ScreenState } from "./data";
 import Home from "./pages/Home";
 import { times, random, shuffle } from "lodash";
 import Lobby from "./pages/Lobby";
-import { auth, db, firestore } from "./firebase";
+import { auth, db } from "./firebase";
 import GameComponent from "./pages/GameComponent";
 import questions from "./questions";
-import { addQuestionToMemberStack } from "./state";
+import { addQuestionToMemberStack, gameTick } from "./state";
 
 function App() {
   const [state, dispatch] = useReducer(reducer, {
@@ -78,40 +78,9 @@ function App() {
     [state, dispatch]
   );
 
-  const gameTick = useCallback(() => {
+  const onTick = useCallback(() => {
     const ref = db.collection("games").doc(state.currentGame);
-    (async () => {
-      const game = (await ref.get()).data() as Game;
-      const state = game.state as PlayState;
-      const gameOver =
-        state.currentTime === 1 &&
-        state.currentQuestionIdx === state.questions.length - 1;
-      const showingScoreboard =
-        state.currentTime === 1
-          ? !state.showingScoreboard
-          : state.showingScoreboard;
-      const incrementingQuestion =
-        state.currentTime === 1 && state.showingScoreboard;
-      const curQuestion = incrementingQuestion
-        ? Math.min(state.currentQuestionIdx + 1, state.questions.length - 1)
-        : state.currentQuestionIdx;
-      if (incrementingQuestion) {
-        await addQuestionToMemberStack(ref, state.questions[curQuestion]);
-      }
-      if (gameOver) {
-        clearInterval(interval);
-        console.log("game over");
-      }
-      ref.update({
-        "state.currentTime":
-          state.currentTime === 1
-            ? game.timeAllotted
-            : firestore.FieldValue.increment(-1),
-        "state.showingScoreboard": showingScoreboard,
-        "state.gameOver": gameOver,
-        "state.currentQuestionIdx": curQuestion,
-      });
-    })();
+    gameTick(ref, interval);
   }, [interval, state]);
 
   const startGame = useCallback(() => {
@@ -132,10 +101,10 @@ function App() {
       await ref.update({ state: gameState });
       await addQuestionToMemberStack(ref, gameState.questions[0]);
       console.log("beginning loop");
-      const int = setInterval(gameTick, 1000);
+      const int = setInterval(onTick, 1000);
       setIntervalState(() => int);
     })();
-  }, [state, gameTick]);
+  }, [state, onTick]);
   return (
     <div>
       {state.screenState === ScreenState.HOME ? (
