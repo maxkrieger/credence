@@ -8,6 +8,8 @@ Add a `.env` file with your firebase JSON assigned to the key `REACT_APP_FIREBAS
 REACT_APP_FIREBASE='{"apiKey": "...", "authDomain": "...","projectId": "...","storageBucket": "...","messagingSenderId": "...","appId": "...","measurementId": "..."}'
 ```
 
+run `yarn` to install deps
+
 ## Running
 
 `yarn start`
