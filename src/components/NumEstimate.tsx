@@ -22,6 +22,17 @@ const NumEstimate = ({
     },
     [memberRef, data]
   );
+  const onChangeConf = useCallback(
+    (e) => {
+      const updatedAnswers = [...data.answers];
+      updatedAnswers[updatedAnswers.length - 1] = {
+        ...updatedAnswers[updatedAnswers.length - 1],
+        confidence: parseFloat(e.target.value),
+      };
+      memberRef.update({ answers: updatedAnswers });
+    },
+    [memberRef, data]
+  );
   if (status !== "success" || data.answers.length < 1) {
     return <div>loading...</div>;
   }
@@ -42,6 +53,19 @@ const NumEstimate = ({
           onChange={onChangeVal}
         />{" "}
         {question.solution.range[1].toLocaleString()}
+      </label>
+      <div>your confidence: {ansVal.confidence * 100}%</div>
+      <label>
+        50%
+        <input
+          type="range"
+          min={0.5}
+          max={1}
+          step={0.05}
+          value={ansVal.confidence}
+          onChange={onChangeConf}
+        />{" "}
+        100%
       </label>
     </div>
   );

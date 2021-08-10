@@ -16,7 +16,7 @@ export const addQuestionToMemberStack = async (
         : question.solution.type === "mcq"
         ? 0
         : (question.solution.range[0] + question.solution.range[1]) / 2,
-    confidence: 1,
+    confidence: 0.7,
   };
   await members.forEach(async (doc) => {
     const memberRef = await doc.ref;
