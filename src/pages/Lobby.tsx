@@ -36,7 +36,7 @@ const Lobby = ({
       <h2>code {game.code}</h2>
       {amAdmin && <button onClick={startGame}>start game</button>}
       <div>
-        {Object.values(members).map((member) => (
+        {(members).map((member) => (
           <div
             key={member.uid}
             style={{

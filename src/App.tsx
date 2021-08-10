@@ -6,6 +6,7 @@ import Lobby from "./pages/Lobby";
 import { auth, db } from "./firebase";
 import GameComponent from "./pages/GameComponent";
 import questions from "./questions";
+import { addQuestionToMemberStack } from "./state";
 
 function App() {
   const [state, dispatch] = useReducer(reducer, {
@@ -37,6 +38,8 @@ function App() {
               name: state.self.userName,
               isAdmin: false,
               isSpectator: false,
+              score: 0,
+              answers: [],
             };
             await ref.collection("members").doc(member.uid).set(member);
 
@@ -61,6 +64,8 @@ function App() {
             name: state.self.userName,
             isAdmin: true,
             isSpectator: false,
+            answers: [],
+            score: 0,
           };
           const ref = db.collection("games").doc(randomCode);
           await ref.set(game);
@@ -81,21 +86,28 @@ function App() {
       const gameOver =
         state.currentTime === 1 &&
         state.currentQuestionIdx === state.questions.length - 1;
+      const showingScoreboard =
+        state.currentTime === 1
+          ? !state.showingScoreboard
+          : state.showingScoreboard;
+      const incrementingQuestion =
+        state.currentTime === 1 && state.showingScoreboard;
+      const curQuestion = incrementingQuestion
+        ? Math.min(state.currentQuestionIdx + 1, state.questions.length - 1)
+        : state.currentQuestionIdx;
+      if (incrementingQuestion) {
+        await addQuestionToMemberStack(ref, state.questions[curQuestion]);
+      }
       if (gameOver) {
         clearInterval(interval);
+        console.log("game over");
       }
       ref.update({
         "state.currentTime":
           state.currentTime === 1 ? game.timeAllotted : state.currentTime - 1,
-        "state.showingScoreboard":
-          state.currentTime === 1
-            ? !state.showingScoreboard
-            : state.showingScoreboard,
+        "state.showingScoreboard": showingScoreboard,
         "state.gameOver": gameOver,
-        "state.currentQuestionIdx":
-          state.currentTime === 1 && state.showingScoreboard
-            ? Math.min(state.currentQuestionIdx + 1, state.questions.length - 1)
-            : state.currentQuestionIdx,
+        "state.currentQuestionIdx": curQuestion,
       });
     })();
   }, [interval, state]);
@@ -104,13 +116,8 @@ function App() {
     (async () => {
       const ref = db.collection("games").doc(state.currentGame);
       const game = (await ref.get()).data() as Game;
-      const members = await ref.collection("members").get();
       const gameState: PlayState = {
         type: "play",
-        scores: members.docs.map((doc) => {
-          const member = doc.data();
-          return { uid: member.uid, score: 0 };
-        }),
         currentQuestionIdx: 0,
         currentTime: game.timeAllotted,
         questions: shuffle(questions.map((q, i) => i)).slice(
@@ -120,7 +127,9 @@ function App() {
         showingScoreboard: false,
         gameOver: false,
       };
-      ref.update({ state: gameState });
+      await ref.update({ state: gameState });
+      await addQuestionToMemberStack(ref, gameState.questions[0]);
+      console.log("beginning loop");
       const int = setInterval(gameTick, 1000);
       setIntervalState(() => int);
     })();

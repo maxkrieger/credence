@@ -18,14 +18,8 @@ export type Question = {
   solution: Solution;
 };
 
-export type MemberScore = {
-  uid: string;
-  score: number;
-};
-
 export type PlayState = {
   type: "play";
-  scores: MemberScore[];
   currentQuestionIdx: number;
   questions: number[];
   currentTime: number;
@@ -39,11 +33,18 @@ export type LobbyState = {
 
 export type GameState = PlayState | LobbyState;
 
+export type Answer = {
+  questionIdx: number;
+  answer: number | boolean;
+};
+
 export type Member = {
   uid: string;
   name: string;
   isAdmin: boolean;
   isSpectator: boolean;
+  score: number;
+  answers: Answer[];
 };
 
 export type Game = {
