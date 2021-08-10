@@ -6,10 +6,6 @@ export type Self = {
 };
 
 export type Solution =
-  | {
-      type: "tf";
-      answer: boolean;
-    }
   | { type: "num"; range: [number, number]; answer: number }
   | { type: "mcq"; options: string[]; answer: number };
 
@@ -35,7 +31,7 @@ export type GameState = PlayState | LobbyState;
 
 export type Answer = {
   questionIdx: number;
-  answer: number | boolean;
+  answer: number;
   confidence: number;
 };
 

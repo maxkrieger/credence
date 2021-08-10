@@ -2,6 +2,46 @@ import { Question } from "./data";
 
 const questions: Question[] = [
   {
+    prompt: "Which population is larger?",
+    solution: {
+      type: "mcq",
+      options: ["Kolkata", "Moscow"],
+      answer: 0,
+    },
+  },
+  {
+    prompt: "Which population is larger?",
+    solution: {
+      type: "mcq",
+      options: ["Ecuador", "Shanghai"],
+      answer: 1,
+    },
+  },
+  {
+    prompt: "Which population is larger?",
+    solution: {
+      type: "mcq",
+      options: ["Tokyo", "Massachusetts"],
+      answer: 0,
+    },
+  },
+  {
+    prompt: "Which country is furthest north?",
+    solution: {
+      type: "mcq",
+      options: ["Uzbekistan", "Turkmenistan", "Kazakhstan"],
+      answer: 2,
+    },
+  },
+  {
+    prompt: "Which country is further south?",
+    solution: {
+      type: "mcq",
+      options: ["Uruguay", "Paraguay"],
+      answer: 0,
+    },
+  },
+  /*{
     prompt: "Population of Nicaragua",
     solution: {
       type: "num",
@@ -40,6 +80,6 @@ const questions: Question[] = [
       range: [1e6, 1e11],
       answer: 3.427e9,
     },
-  },
+  },*/
 ];
 export default questions;

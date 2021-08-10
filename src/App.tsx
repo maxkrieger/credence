@@ -55,8 +55,8 @@ function App() {
           const game: Game = {
             code: randomCode,
             admin: state.self.uid,
-            timeAllotted: 5,
-            numQuestions: 2,
+            timeAllotted: 15,
+            numQuestions: 3,
             state: { type: "lobby" },
           };
           const member: Member = {

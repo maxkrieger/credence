@@ -3,6 +3,7 @@ import {
   useFirestoreCollectionData,
   useFirestoreDocData,
 } from "reactfire";
+import Mcq from "../components/Mcq";
 import NumEstimate from "../components/NumEstimate";
 import { Game, Member, PlayState, State } from "../data";
 import questions from "../questions";
@@ -46,7 +47,7 @@ const GameComponent = ({ state }: { state: State }) => {
       {question.solution.type === "num" ? (
         <NumEstimate memberRef={memberRef} question={question} />
       ) : (
-        <div />
+        <Mcq memberRef={memberRef} question={question} />
       )}
     </div>
   );

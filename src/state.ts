@@ -1,4 +1,4 @@
-import { Answer, Game, PlayState } from "./data";
+import { Answer, Game, Member, PlayState } from "./data";
 import { docRef, firestore } from "./firebase";
 import questions from "./questions";
 
@@ -11,9 +11,7 @@ export const addQuestionToMemberStack = async (
   const defaultAnswer: Answer = {
     questionIdx,
     answer:
-      question.solution.type === "tf"
-        ? false
-        : question.solution.type === "mcq"
+      question.solution.type === "mcq"
         ? 0
         : (question.solution.range[0] + question.solution.range[1]) / 2,
     confidence: 0.7,
@@ -22,6 +20,23 @@ export const addQuestionToMemberStack = async (
     const memberRef = await doc.ref;
     await memberRef.update({
       answers: firestore.FieldValue.arrayUnion(defaultAnswer),
+    });
+  });
+};
+
+const computeScores = async (gameRef: docRef) => {
+  const members = await gameRef.collection("members").get();
+  await members.forEach(async (doc) => {
+    const memberRef = await doc.ref;
+    const member = doc.data() as Member;
+    const lastAns = member.answers[member.answers.length - 1];
+    const question = questions[lastAns.questionIdx];
+    const score =
+      lastAns.answer === question.solution.answer
+        ? Math.log2(lastAns.confidence / 0.5)
+        : Math.log2((1 - lastAns.confidence) / 0.5);
+    await memberRef.update({
+      score: firestore.FieldValue.increment(score * 100),
     });
   });
 };
@@ -42,6 +57,9 @@ export const gameTick = async (gameRef: docRef, interval: NodeJS.Timeout) => {
   const curQuestion = incrementingQuestion
     ? Math.min(state.currentQuestionIdx + 1, state.questions.length - 1)
     : state.currentQuestionIdx;
+  if (showingScoreboard && state.currentTime === 1) {
+    await computeScores(gameRef);
+  }
   if (incrementingQuestion) {
     await addQuestionToMemberStack(gameRef, state.questions[curQuestion]);
   }
