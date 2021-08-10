@@ -94,7 +94,7 @@ function App() {
         "state.gameOver": gameOver,
         "state.currentQuestionIdx":
           state.currentTime === 1 && state.showingScoreboard
-            ? state.currentQuestionIdx + 1
+            ? Math.min(state.currentQuestionIdx + 1, state.questions.length - 1)
             : state.currentQuestionIdx,
       });
     })();
@@ -120,7 +120,6 @@ function App() {
         showingScoreboard: false,
         gameOver: false,
       };
-      console.log(gameState);
       ref.update({ state: gameState });
       const int = setInterval(gameTick, 1000);
       setIntervalState(() => int);
