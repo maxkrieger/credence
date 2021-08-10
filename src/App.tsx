@@ -3,7 +3,7 @@ import { Game, Member, PlayState, reducer, ScreenState } from "./data";
 import Home from "./pages/Home";
 import { times, random, shuffle } from "lodash";
 import Lobby from "./pages/Lobby";
-import { auth, db } from "./firebase";
+import { auth, db, firestore } from "./firebase";
 import GameComponent from "./pages/GameComponent";
 import questions from "./questions";
 import { addQuestionToMemberStack } from "./state";
@@ -104,7 +104,9 @@ function App() {
       }
       ref.update({
         "state.currentTime":
-          state.currentTime === 1 ? game.timeAllotted : state.currentTime - 1,
+          state.currentTime === 1
+            ? game.timeAllotted
+            : firestore.FieldValue.increment(-1),
         "state.showingScoreboard": showingScoreboard,
         "state.gameOver": gameOver,
         "state.currentQuestionIdx": curQuestion,

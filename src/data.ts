@@ -36,6 +36,7 @@ export type GameState = PlayState | LobbyState;
 export type Answer = {
   questionIdx: number;
   answer: number | boolean;
+  confidence: number;
 };
 
 export type Member = {
