@@ -1,7 +1,15 @@
 import { useCallback, useState } from "react";
-import { TopProps } from "../data";
+import { Dispatch, State } from "../data";
 
-const Home = ({ state, dispatch, beginSubscription }: TopProps) => {
+const Home = ({
+  state,
+  dispatch,
+  beginSubscription,
+}: {
+  state: State;
+  dispatch: Dispatch;
+  beginSubscription: (code?: string) => void;
+}) => {
   const [gameCode, setGameCode] = useState("");
   const onChangeUsername = useCallback(
     (e) => {

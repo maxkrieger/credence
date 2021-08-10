@@ -25,10 +25,12 @@ export type MemberScore = {
 
 export type PlayState = {
   type: "play";
-  scores: { [uid: string]: MemberScore };
+  scores: MemberScore[];
   currentQuestionIdx: number;
   questions: number[];
   currentTime: number;
+  showingScoreboard: boolean;
+  gameOver: boolean;
 };
 
 export type LobbyState = {
@@ -55,6 +57,7 @@ export type Game = {
 export enum ScreenState {
   HOME,
   LOBBY,
+  GAME,
 }
 
 export type State = {
@@ -72,12 +75,6 @@ export type Action =
   | { type: "SET_GAME"; game: string };
 
 export type Dispatch = React.Dispatch<Action>;
-
-export type TopProps = {
-  state: State;
-  dispatch: Dispatch;
-  beginSubscription: (code?: string) => void;
-};
 
 export const reducer = (prevState: State, action: Action): State => {
   switch (action.type) {
