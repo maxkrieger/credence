@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { TopProps } from "../data";
 
-const Home = ({ state, dispatch }: TopProps) => {
+const Home = ({ state, dispatch, beginSubscription }: TopProps) => {
   const [gameCode, setGameCode] = useState("");
   const onChangeUsername = useCallback(
     (e) => {
@@ -12,12 +12,12 @@ const Home = ({ state, dispatch }: TopProps) => {
     },
     [dispatch, state]
   );
-  const onJoinGame = useCallback(() => {}, [dispatch, state]);
-  const onCreateGame = useCallback(() => {}, [dispatch, state]);
   return (
     <div>
       <h1>Credence Calibration</h1>
-      {state.game.code === "" ? (
+      {state.self.uid === "" ? (
+        "waiting for firebase..."
+      ) : (
         <div>
           <div>
             <label>
@@ -44,7 +44,7 @@ const Home = ({ state, dispatch }: TopProps) => {
               />
             </label>
             <button
-              onClick={onJoinGame}
+              onClick={() => beginSubscription(gameCode)}
               disabled={state.self.userName === "" || gameCode === ""}
             >
               Join Game
@@ -52,16 +52,12 @@ const Home = ({ state, dispatch }: TopProps) => {
           </div>
           <div style={{ padding: "1em" }}>
             <button
-              onClick={onCreateGame}
+              onClick={() => beginSubscription()}
               disabled={state.self.userName === ""}
             >
               Create Game
             </button>
           </div>
-        </div>
-      ) : (
-        <div>
-          <h2>{state.self.userName}'s Game</h2>
         </div>
       )}
     </div>

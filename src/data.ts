@@ -2,8 +2,7 @@ import React from "react";
 
 export type Self = {
   userName: string;
-  isAdmin: boolean;
-  gameId: string;
+  uid: string;
 };
 
 export type Solution =
@@ -19,18 +18,49 @@ export type Question = {
   solution: Solution;
 };
 
+export type MemberScore = {
+  uid: string;
+  score: number;
+};
+
+export type PlayState = {
+  type: "play";
+  scores: { [uid: string]: MemberScore };
+  currentQuestionIdx: number;
+  questions: number[];
+  currentTime: number;
+};
+
+export type LobbyState = {
+  type: "lobby";
+};
+
+export type GameState = PlayState | LobbyState;
+
+export type Member = {
+  uid: string;
+  name: string;
+  isAdmin: boolean;
+  isSpectator: boolean;
+};
+
 export type Game = {
   code: string;
+  admin: string;
+  timeAllotted: number;
+  numQuestions: number;
+  state: GameState;
 };
 
 export enum ScreenState {
   HOME,
+  LOBBY,
 }
 
 export type State = {
   self: Self;
   screenState: ScreenState;
-  game: Game;
+  currentGame: string;
 };
 
 export type Action =
@@ -38,11 +68,16 @@ export type Action =
       type: "SET_SELF";
       self: Self;
     }
-  | { type: "SET_SCREEN"; state: ScreenState };
+  | { type: "SET_SCREEN"; state: ScreenState }
+  | { type: "SET_GAME"; game: string };
 
 export type Dispatch = React.Dispatch<Action>;
 
-export type TopProps = { state: State; dispatch: Dispatch };
+export type TopProps = {
+  state: State;
+  dispatch: Dispatch;
+  beginSubscription: (code?: string) => void;
+};
 
 export const reducer = (prevState: State, action: Action): State => {
   switch (action.type) {
@@ -50,7 +85,10 @@ export const reducer = (prevState: State, action: Action): State => {
       return { ...prevState, self: action.self };
     case "SET_SCREEN":
       return { ...prevState, screenState: action.state };
+    case "SET_GAME":
+      return { ...prevState, currentGame: action.game };
     default:
+      console.warn("reducer fallthrough");
       return prevState;
   }
 };
