@@ -6,6 +6,19 @@ export type Self = {
   gameId: string;
 };
 
+export type Solution =
+  | {
+      type: "tf";
+      answer: boolean;
+    }
+  | { type: "num"; range: [number, number]; answer: number }
+  | { type: "mcq"; options: string[]; answer: number };
+
+export type Question = {
+  prompt: string;
+  solution: Solution;
+};
+
 export type Game = {
   code: string;
 };
