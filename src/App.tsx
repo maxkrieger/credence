@@ -6,7 +6,7 @@ import Lobby from "./pages/Lobby";
 import { auth, db } from "./firebase";
 import GameComponent from "./pages/GameComponent";
 import { addQuestionToMemberStack, gameTick } from "./state";
-import { generatePopulationQuestion } from "./questions";
+import { pickRandomQuestion } from "./questions";
 
 function App() {
   const [state, dispatch] = useReducer(reducer, {
@@ -91,9 +91,7 @@ function App() {
         type: "play",
         currentQuestionIdx: 0,
         currentTime: game.timeAllotted,
-        questions: shuffle(
-          times(game.numQuestions, generatePopulationQuestion)
-        ),
+        questions: shuffle(times(game.numQuestions, pickRandomQuestion)),
         showingScoreboard: false,
         gameOver: false,
       };

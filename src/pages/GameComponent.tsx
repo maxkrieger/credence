@@ -52,7 +52,14 @@ const GameComponent = ({
         <h2>{playState.currentTime} sec</h2>
         {sortedMembers.map((member) => (
           <div key={member.uid} style={{ margin: "1em" }}>
-            {member.name}: {Math.round(member.score)}{" "}
+            <span
+              style={{
+                fontWeight: member.uid === state.self.uid ? "bold" : "normal",
+              }}
+            >
+              {member.name}
+            </span>
+            : {Math.round(member.score)}{" "}
             <span
               style={{
                 color:

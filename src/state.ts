@@ -28,8 +28,18 @@ export const getDelta = (question: Question, member: Member) => {
   const score =
     lastAns.answer === question.solution.answer
       ? Math.log2(lastAns.confidence / 0.5)
-      : Math.log2((1 - lastAns.confidence) / 0.5);
+      : Math.max(Math.log2((1 - lastAns.confidence) / 0.5), -50);
   return score * 100;
+};
+
+export const resetGameScores = async (gameRef: docRef) => {
+  const members = await gameRef.collection("members").get();
+  await members.forEach(async (doc) => {
+    const memberRef = await doc.ref;
+    await memberRef.update({
+      score: 0,
+    });
+  });
 };
 
 const computeScores = async (gameRef: docRef, gameState: PlayState) => {

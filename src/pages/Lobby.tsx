@@ -5,6 +5,7 @@ import {
   useFirestoreDocData,
 } from "reactfire";
 import { Dispatch, Game, Member, ScreenState, State } from "../data";
+import { resetGameScores } from "../state";
 
 const Lobby = ({
   state,
@@ -25,6 +26,9 @@ const Lobby = ({
       dispatch({ type: "SET_SCREEN", state: ScreenState.GAME });
     }
   }, [game, dispatch]);
+  const resetScores = useCallback(() => {
+    resetGameScores(gameRef);
+  }, [gameRef]);
   if (status !== "success" || memberStatus !== "success") {
     return <div>loading...</div>;
   }
@@ -39,6 +43,7 @@ const Lobby = ({
         seconds per question
       </h2>
       {amAdmin && <button onClick={startGame}>start game</button>}
+      {amAdmin && <button onClick={resetScores}>reset scores</button>}
       <div>
         {members.map((member) => (
           <div
@@ -47,7 +52,7 @@ const Lobby = ({
               backgroundColor: member.isAdmin ? "#ffe70b7f" : "rgba(0,0,0,0)",
             }}
           >
-            {member.name}
+            {member.name} (score: {member.score})
           </div>
         ))}
       </div>
