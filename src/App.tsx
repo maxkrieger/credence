@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef } from "react";
 import { Game, Member, PlayState, reducer, ScreenState } from "./data";
 import Home from "./pages/Home";
 import { times, random, shuffle } from "lodash";
 import Lobby from "./pages/Lobby";
 import { auth, db } from "./firebase";
 import GameComponent from "./pages/GameComponent";
-import questions from "./questions";
 import { addQuestionToMemberStack, gameTick } from "./state";
+import { generatePopulationQuestion } from "./questions";
 
 function App() {
   const [state, dispatch] = useReducer(reducer, {
@@ -55,8 +55,8 @@ function App() {
           const game: Game = {
             code: randomCode,
             admin: state.self.uid,
-            timeAllotted: 15,
-            numQuestions: 3,
+            timeAllotted: 10,
+            numQuestions: 8,
             state: { type: "lobby" },
           };
           const member: Member = {
@@ -91,15 +91,14 @@ function App() {
         type: "play",
         currentQuestionIdx: 0,
         currentTime: game.timeAllotted,
-        questions: shuffle(questions.map((q, i) => i)).slice(
-          0,
-          game.numQuestions
+        questions: shuffle(
+          times(game.numQuestions, generatePopulationQuestion)
         ),
         showingScoreboard: false,
         gameOver: false,
       };
       await ref.update({ state: gameState });
-      await addQuestionToMemberStack(ref, gameState.questions[0]);
+      await addQuestionToMemberStack(ref, 0, gameState.questions[0]);
       const int = setInterval(onTick, 1000);
       interval.current = int;
     })();
@@ -115,7 +114,7 @@ function App() {
       ) : state.screenState === ScreenState.LOBBY ? (
         <Lobby state={state} startGame={startGame} dispatch={dispatch} />
       ) : state.screenState === ScreenState.GAME ? (
-        <GameComponent state={state} />
+        <GameComponent state={state} dispatch={dispatch} />
       ) : (
         <div />
       )}

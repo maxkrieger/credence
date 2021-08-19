@@ -1,12 +1,11 @@
-import { Answer, Game, Member, PlayState } from "./data";
+import { Answer, Game, Member, PlayState, Question } from "./data";
 import { docRef, firestore } from "./firebase";
-import questions from "./questions";
 
 export const addQuestionToMemberStack = async (
   gameRef: docRef,
-  questionIdx: number
+  questionIdx: number,
+  question: Question
 ) => {
-  const question = questions[questionIdx];
   const members = await gameRef.collection("members").get();
   const defaultAnswer: Answer = {
     questionIdx,
@@ -24,19 +23,24 @@ export const addQuestionToMemberStack = async (
   });
 };
 
-const computeScores = async (gameRef: docRef) => {
+export const getDelta = (question: Question, member: Member) => {
+  const lastAns = member.answers[member.answers.length - 1];
+  const score =
+    lastAns.answer === question.solution.answer
+      ? Math.log2(lastAns.confidence / 0.5)
+      : Math.log2((1 - lastAns.confidence) / 0.5);
+  return score * 100;
+};
+
+const computeScores = async (gameRef: docRef, gameState: PlayState) => {
   const members = await gameRef.collection("members").get();
   await members.forEach(async (doc) => {
     const memberRef = await doc.ref;
     const member = doc.data() as Member;
     const lastAns = member.answers[member.answers.length - 1];
-    const question = questions[lastAns.questionIdx];
-    const score =
-      lastAns.answer === question.solution.answer
-        ? Math.log2(lastAns.confidence / 0.5)
-        : Math.log2((1 - lastAns.confidence) / 0.5);
+    const question = gameState.questions[lastAns.questionIdx];
     await memberRef.update({
-      score: firestore.FieldValue.increment(score * 100),
+      score: firestore.FieldValue.increment(getDelta(question, member)),
     });
   });
 };
@@ -45,7 +49,6 @@ export const gameTick = async (gameRef: docRef, interval: NodeJS.Timeout) => {
   const game = (await gameRef.get()).data() as Game;
   const state = game.state as PlayState;
   const gameOver =
-    state.currentTime === 1 &&
     state.showingScoreboard &&
     state.currentQuestionIdx === state.questions.length - 1;
   const showingScoreboard =
@@ -58,21 +61,29 @@ export const gameTick = async (gameRef: docRef, interval: NodeJS.Timeout) => {
     ? Math.min(state.currentQuestionIdx + 1, state.questions.length - 1)
     : state.currentQuestionIdx;
   if (showingScoreboard && state.currentTime === 1) {
-    await computeScores(gameRef);
+    await computeScores(gameRef, state);
   }
   if (incrementingQuestion) {
-    await addQuestionToMemberStack(gameRef, state.questions[curQuestion]);
+    await addQuestionToMemberStack(
+      gameRef,
+      curQuestion,
+      state.questions[curQuestion]
+    );
   }
-  if (gameOver) {
+  if (gameOver && state.currentTime === 1) {
     clearInterval(interval);
+    await gameRef.update({
+      state: { type: "lobby" },
+    });
+  } else {
+    await gameRef.update({
+      "state.currentTime":
+        state.currentTime === 1
+          ? game.timeAllotted
+          : firestore.FieldValue.increment(-1),
+      "state.showingScoreboard": showingScoreboard,
+      "state.gameOver": gameOver,
+      "state.currentQuestionIdx": curQuestion,
+    });
   }
-  await gameRef.update({
-    "state.currentTime":
-      state.currentTime === 1
-        ? game.timeAllotted
-        : firestore.FieldValue.increment(-1),
-    "state.showingScoreboard": showingScoreboard,
-    "state.gameOver": gameOver,
-    "state.currentQuestionIdx": curQuestion,
-  });
 };

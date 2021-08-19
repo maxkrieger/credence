@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import {
   useFirestore,
   useFirestoreCollectionData,
@@ -34,9 +34,13 @@ const Lobby = ({
     <div>
       <h1>Lobby</h1>
       <h2>code {game.code}</h2>
+      <h2>
+        there will be {game.numQuestions} questions with {game.timeAllotted}{" "}
+        seconds per question
+      </h2>
       {amAdmin && <button onClick={startGame}>start game</button>}
       <div>
-        {(members).map((member) => (
+        {members.map((member) => (
           <div
             key={member.uid}
             style={{

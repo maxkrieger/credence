@@ -48,17 +48,19 @@ const Mcq = ({
       <div>
         {shuffledOpts.map(({ s, i }) => (
           <div key={s + i}>
-            <input
-              type="radio"
-              value={i}
-              checked={ansVal.answer === i}
-              onChange={changeMcq}
-            />{" "}
-            {s}
+            <label style={{ width: "100%" }}>
+              <input
+                type="radio"
+                value={i}
+                checked={ansVal.answer === i}
+                onChange={changeMcq}
+              />{" "}
+              {s}
+            </label>
           </div>
         ))}
       </div>
-      <div>your confidence: {ansVal.confidence * 100}%</div>
+      <div>your confidence: {Math.round(ansVal.confidence * 100)}%</div>
       <label>
         50%
         <input

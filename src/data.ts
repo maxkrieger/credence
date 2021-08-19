@@ -17,7 +17,7 @@ export type Question = {
 export type PlayState = {
   type: "play";
   currentQuestionIdx: number;
-  questions: number[];
+  questions: Question[];
   currentTime: number;
   showingScoreboard: boolean;
   gameOver: boolean;
